@@ -149,7 +149,7 @@ public class PlaceOrderFormController {
 //                    rst.next();
 //                   ItemDTO item = new ItemDTO(newItemCode + "", i.getString("description"), rst.getBigDecimal("unitPrice"), rst.getInt("qtyOnHand"));
                     ItemDAOImpl itemDAO = new ItemDAOImpl();
-                    ItemDTO item = itemDAO.findItem(newItemCode);
+                    ItemDTO item = itemDAO.searchItem(newItemCode);
 
                     txtDescription.setText(item.getDescription());
                     txtUnitPrice.setText(item.getUnitPrice().setScale(2).toString());
@@ -450,7 +450,7 @@ boolean isSaved = itemDAO.updateItem(new ItemDTO(item.getCode(),item.getDescript
 //            rst.next();
 //            return new ItemDTO(code, rst.getString("description"), rst.getBigDecimal("unitPrice"), rst.getInt("qtyOnHand"));
        ItemDAO itemDAO = new ItemDAOImpl();
-       return itemDAO.findItem(code);
+       return itemDAO.searchItem(code);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find the Item " + code, e);
         } catch (ClassNotFoundException e) {
