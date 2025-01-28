@@ -1,5 +1,9 @@
 package com.example.layeredarchitecture.controller;
 
+import com.example.layeredarchitecture.dao.custom.CustomerDAO;
+import com.example.layeredarchitecture.dao.custom.ItemDAO;
+import com.example.layeredarchitecture.dao.custom.OrderDAO;
+import com.example.layeredarchitecture.dao.custom.OrderDetailDAO;
 import com.example.layeredarchitecture.dao.impl.CustomerDAOImpl;
 import com.example.layeredarchitecture.dao.impl.ItemDAOImpl;
 import com.example.layeredarchitecture.dao.impl.OrderDAOImpl;
@@ -194,7 +198,7 @@ public class PlaceOrderFormController {
 //        PreparedStatement pstm = connection.prepareStatement("SELECT code FROM Item WHERE code=?");
 //        pstm.setString(1, code);
 //        return pstm.executeQuery().next();
-        ItemDAOImpl itemDAO = new ItemDAOImpl();
+        ItemDAO itemDAO = new ItemDAOImpl();
         return itemDAO.existItem(code);
     }
 
@@ -203,7 +207,7 @@ public class PlaceOrderFormController {
 //        PreparedStatement pstm = connection.prepareStatement("SELECT id FROM Customer WHERE id=?");
 //        pstm.setString(1, id);
 //        return pstm.executeQuery().next();
-        CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+        CustomerDAO customerDAO = new CustomerDAOImpl();
         return customerDAO.exitCustomer(id);
     }
 
@@ -215,7 +219,7 @@ public class PlaceOrderFormController {
 //
 //
 //           return rst.next() ? String.format("OID-%03d", (Integer.parseInt(rst.getString("oid").replace("OID-", "")) + 1)) : "OID-001";
-            OrderDAOImpl orderDAO = new OrderDAOImpl();
+            OrderDAO orderDAO = new OrderDAOImpl();
             return orderDAO.generateNewId();
         } catch (SQLException e) {
             new Alert(Alert.AlertType.ERROR, "Failed to generate a new order id").show();
@@ -234,7 +238,7 @@ public class PlaceOrderFormController {
 //            while (rst.next()) {
 //                cmbCustomerId.getItems().add(rst.getString("id"));
 //            }
-            CustomerDAOImpl customerDAO = new CustomerDAOImpl();
+            CustomerDAO customerDAO = new CustomerDAOImpl();
             ArrayList<CustomerDTO> customerDTOArrayList = customerDAO.getAllCustomers();
             for(CustomerDTO customerDTO : customerDTOArrayList ){
                 cmbCustomerId.getItems().add(customerDTO.getId());
@@ -256,7 +260,7 @@ public class PlaceOrderFormController {
 //            while (rst.next()) {
 //                cmbItemCode.getItems().add(rst.getString("code"));
 //            }
-            ItemDAOImpl itemDAO = new ItemDAOImpl();
+            ItemDAO itemDAO = new ItemDAOImpl();
             ArrayList<ItemDTO> itemDTOArrayList = itemDAO.getAllItem();
             for (ItemDTO itemDTO : itemDTOArrayList){
                 cmbItemCode.getItems().add(itemDTO.getCode());
@@ -373,7 +377,7 @@ public class PlaceOrderFormController {
 //            if (stm.executeQuery().next()) {
 //
 //            }
-            OrderDAOImpl orderDAO = new OrderDAOImpl();
+            OrderDAO orderDAO = new OrderDAOImpl();
             if (orderDAO.existOrderId(orderId)){
                 return false;
             }
@@ -391,7 +395,7 @@ public class PlaceOrderFormController {
             }
 
          //   stm = connection.prepareStatement("INSERT INTO OrderDetails (oid, itemCode, unitPrice, qty) VALUES (?,?,?,?)");
-            OrderDetailDAOImpl detailDAO = new OrderDetailDAOImpl();
+            OrderDetailDAO detailDAO = new OrderDetailDAOImpl();
 
             for (OrderDetailDTO detail : orderDetails) {
 //                stm.setString(1, orderId);
@@ -414,7 +418,7 @@ public class PlaceOrderFormController {
 //                pstm.setBigDecimal(2, item.getUnitPrice());
 //                pstm.setInt(3, item.getQtyOnHand());
 //                pstm.setString(4, item.getCode());
-                ItemDAOImpl itemDAO = new ItemDAOImpl();
+                ItemDAO itemDAO = new ItemDAOImpl();
 
 boolean isSaved = itemDAO.updateItem(new ItemDTO(item.getCode(),item.getDescription(),item.getUnitPrice(),item.getQtyOnHand()));
                 if (!(isSaved )) {
@@ -445,7 +449,7 @@ boolean isSaved = itemDAO.updateItem(new ItemDTO(item.getCode(),item.getDescript
 //            ResultSet rst = pstm.executeQuery();
 //            rst.next();
 //            return new ItemDTO(code, rst.getString("description"), rst.getBigDecimal("unitPrice"), rst.getInt("qtyOnHand"));
-       ItemDAOImpl itemDAO = new ItemDAOImpl();
+       ItemDAO itemDAO = new ItemDAOImpl();
        return itemDAO.findItem(code);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to find the Item " + code, e);
