@@ -5,13 +5,14 @@ import com.example.layeredarchitecture.dao.custom.OrderDetailDAO;
 import com.example.layeredarchitecture.db.DBConnection;
 import com.example.layeredarchitecture.model.OrderDetailDTO;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class OrderDetailDAOImpl implements OrderDetailDAO {
     @Override
-    public int addOrderdetail(String orderId, OrderDetailDTO detail) throws SQLException, ClassNotFoundException {
+    public boolean addOrderdetail(String orderId, String itemCode, BigDecimal unitPrice, int qty) throws SQLException, ClassNotFoundException {
 //        Connection connection = DBConnection.getDbConnection().getConnection();
 //        PreparedStatement stm = connection.prepareStatement("INSERT INTO OrderDetails (oid, itemCode, unitPrice, qty) VALUES (?,?,?,?)");
 //        stm.setString(1, orderId);
@@ -19,6 +20,6 @@ public class OrderDetailDAOImpl implements OrderDetailDAO {
 //        stm.setBigDecimal(3, detail.getUnitPrice());
 //        stm.setInt(4, detail.getQty());
 //        return stm.executeUpdate();
-        return SQLUtil.execute("INSERT INTO OrderDetails (oid, itemCode, unitPrice, qty) VALUES (?,?,?,?)",orderId,detail.getItemCode(),detail.getUnitPrice(),detail.getQty());
+        return SQLUtil.execute("INSERT INTO OrderDetails (oid, itemCode, unitPrice, qty) VALUES (?,?,?,?)",orderId,itemCode,unitPrice,qty);
     }
 }

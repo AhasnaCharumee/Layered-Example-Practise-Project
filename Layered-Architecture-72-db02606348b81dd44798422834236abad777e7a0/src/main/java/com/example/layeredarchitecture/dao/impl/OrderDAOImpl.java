@@ -17,13 +17,13 @@ public class OrderDAOImpl implements OrderDAO {
         return rst.next() ? String.format("OID-%03d", (Integer.parseInt(rst.getString("oid").replace("OID-", "")) + 1)) : "OID-001";
     }
 @Override
-    public boolean existOrderId(String orderId) throws SQLException, ClassNotFoundException {
-//       Connection connection = DBConnection.getDbConnection().getConnection();
-//        PreparedStatement stm = connection.prepareStatement("SELECT oid FROM `Orders` WHERE oid=?");
-//        stm.setString(1, orderId);
-        return SQLUtil.execute("SELECT oid FROM `Orders` WHERE oid=?",orderId);
-
+public boolean existOrderId(String orderId) throws SQLException, ClassNotFoundException {
+    ResultSet rst = SQLUtil.execute("SELECT oid FROM `Orders` WHERE oid=?", orderId);
+    if (rst.next()){
+        return true;
     }
+    return false;
+}
     @Override
     public boolean addOrder(String orderId, LocalDate orderDate, String customerId) throws SQLException, ClassNotFoundException {
 //        Connection connection = DBConnection.getDbConnection().getConnection();
@@ -34,6 +34,6 @@ public class OrderDAOImpl implements OrderDAO {
 //        stm.setDate(2, Date.valueOf(orderDate));
 //        stm.setString(3, customerId);
 //        return stm.executeUpdate();
-return SQLUtil.execute("INSERT INTO `Orders` (oid, date, customerID) VALUES (?,?,?)",orderId,orderDate,customerId);
+return SQLUtil.execute("INSERT INTO `Orders` (oid, date, customerID) VALUES (?,?,?)",orderId,Date.valueOf(orderDate),customerId);
     }
 }

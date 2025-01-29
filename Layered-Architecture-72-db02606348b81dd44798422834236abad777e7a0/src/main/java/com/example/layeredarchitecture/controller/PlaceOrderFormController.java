@@ -347,7 +347,7 @@ public class PlaceOrderFormController {
             return;
         }
 
-        boolean isOrderSaved = saveOrder(orderId, orderDate, cmbCustomerId.getValue(),
+        boolean isOrderSaved = saveOrder(orderId, LocalDate.now(), cmbCustomerId.getValue(),
                 tblOrderDetails.getItems().stream().map(tm -> new OrderDetailDTO(tm.getCode(), tm.getQty(), tm.getUnitPrice())).collect(Collectors.toList()));
 
         if (isOrderSaved) {
@@ -366,62 +366,38 @@ public class PlaceOrderFormController {
     }
 
     public boolean saveOrder(String orderId, LocalDate orderDate, String customerId, List<OrderDetailDTO> orderDetails) {
-        /*Transaction*/
-
         Connection connection = null;
         try {
             connection = DBConnection.getDbConnection().getConnection();
-//            PreparedStatement stm = connection.prepareStatement("SELECT oid FROM `Orders` WHERE oid=?");
-//            stm.setString(1, orderId);
-//            /*if order id already exist*/
-//            if (stm.executeQuery().next()) {
-//
-//            }
             OrderDAO orderDAO = new OrderDAOImpl();
-            if (orderDAO.existOrderId(orderId)){
+            boolean rst = orderDAO.existOrderId(orderId);
+            if (rst) {
+                new Alert(Alert.AlertType.ERROR, "Order ID already exists").show();
                 return false;
             }
 
-           connection.setAutoCommit(false);
-     //     stm = connection.prepareStatement("INSERT INTO `Orders` (oid, date, customerID) VALUES (?,?,?)");
-//            stm.setString(1, orderId);
-//            stm.setDate(2, Date.valueOf(orderDate));
-//            stm.setString(3, customerId);
-
-            if (orderDAO.addOrder(orderId, orderDate, customerId) != 1) {
+            connection.setAutoCommit(false);
+            if (!orderDAO.addOrder(orderId, orderDate, customerId)) {
+                new Alert(Alert.AlertType.ERROR, "Failed to add order").show();
                 connection.rollback();
                 connection.setAutoCommit(true);
                 return false;
             }
 
-         //   stm = connection.prepareStatement("INSERT INTO OrderDetails (oid, itemCode, unitPrice, qty) VALUES (?,?,?,?)");
             OrderDetailDAO detailDAO = new OrderDetailDAOImpl();
-
             for (OrderDetailDTO detail : orderDetails) {
-//                stm.setString(1, orderId);
-//                stm.setString(2, detail.getItemCode());
-//                stm.setBigDecimal(3, detail.getUnitPrice());
-//                stm.setInt(4, detail.getQty());
-
-                if (detailDAO.addOrderdetail(orderId,detail) != 1) {
+                if (!detailDAO.addOrderdetail(orderId, detail.getItemCode(), detail.getUnitPrice(), detail.getQty())) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to add order detail for item: " + detail.getItemCode()).show();
                     connection.rollback();
                     connection.setAutoCommit(true);
                     return false;
                 }
 
-//                //Search & Update Item
                 ItemDTO item = findItem(detail.getItemCode());
                 item.setQtyOnHand(item.getQtyOnHand() - detail.getQty());
-
-//                PreparedStatement pstm = connection.prepareStatement("UPDATE Item SET description=?, unitPrice=?, qtyOnHand=? WHERE code=?");
-//                pstm.setString(1, item.getDescription());
-//                pstm.setBigDecimal(2, item.getUnitPrice());
-//                pstm.setInt(3, item.getQtyOnHand());
-//                pstm.setString(4, item.getCode());
                 ItemDAO itemDAO = new ItemDAOImpl();
-
-boolean isSaved = itemDAO.updateItem(new ItemDTO(item.getCode(),item.getDescription(),item.getUnitPrice(),item.getQtyOnHand()));
-                if (!(isSaved )) {
+                if (!itemDAO.updateItem(new ItemDTO(item.getCode(), item.getDescription(), item.getUnitPrice(), item.getQtyOnHand()))) {
+                    new Alert(Alert.AlertType.ERROR, "Failed to update item: " + item.getCode()).show();
                     connection.rollback();
                     connection.setAutoCommit(true);
                     return false;
@@ -432,15 +408,20 @@ boolean isSaved = itemDAO.updateItem(new ItemDTO(item.getCode(),item.getDescript
             connection.setAutoCommit(true);
             return true;
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "An error occurred: " + e.getMessage()).show();
+            try {
+                if (connection != null) {
+                    connection.rollback();
+                    connection.setAutoCommit(true);
+                }
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+            return false;
         }
-        return false;
     }
-
-
     public ItemDTO findItem(String code) {
         try {
 //            Connection connection = DBConnection.getDbConnection().getConnection();
